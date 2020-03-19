@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Animated, View, Easing } from "react-native";
-import ScreenContainer from "./Components/ScreenContainer";
+import { Animated, Easing, View } from "react-native";
+import ScreenContainer, {
+  InterpolatedStyles
+} from "./Components/ScreenContainer";
 import { useBackHandler } from "./hooks/useBackHandler";
 import { navigatorStyles } from "./navigatorStyles";
 
 export type NavigationProp = {
   navigation: {
-    navigate(toRoute: string, newRouteStack: string[]): void;
+    navigate(
+      toRoute: string,
+      newRouteStack: string[],
+      animations?: ScreenAnimations
+    ): void;
     routeStack: string[];
   };
 };
@@ -23,6 +29,11 @@ type NavigatorState = {
   routeStack: string[];
 };
 
+type ScreenAnimations = {
+  incoming: AnimationFunction;
+  outgoing: AnimationFunction;
+};
+
 const Navigator: React.FC<NavigatorProps> = ({
   initialRouteName,
   routeMap
@@ -36,6 +47,10 @@ const Navigator: React.FC<NavigatorProps> = ({
 
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const [animatedValue] = useState<Animated.Value>(new Animated.Value(0));
+  const [
+    screenAnimations,
+    setScreenAnimations
+  ] = useState<ScreenAnimations | null>(null);
 
   const handleAnimate = () => {
     animatedValue.setValue(0);
@@ -56,7 +71,14 @@ const Navigator: React.FC<NavigatorProps> = ({
     setIsAnimating(false);
   };
 
-  const handleNavigate = (toRoute: string, newRouteStack: string[]) => {
+  const handleNavigate = (
+    toRoute: string,
+    newRouteStack: string[],
+    animations?: ScreenAnimations
+  ) => {
+    if (animations) {
+      setScreenAnimations(animations);
+    }
     handleAnimate();
     setNavigatorState(prevState => {
       const {
@@ -102,6 +124,7 @@ const Navigator: React.FC<NavigatorProps> = ({
   return (
     <ScreenRenderer
       animatedValue={animatedValue}
+      animations={screenAnimations}
       isAnimating={isAnimating}
       navigatorState={navigatorState}
       onNavigate={handleNavigate}
@@ -112,8 +135,10 @@ const Navigator: React.FC<NavigatorProps> = ({
 
 export default Navigator;
 
+type AnimationFunction = (position: Animated.Value) => InterpolatedStyles;
 interface ScreenRendererProps {
   animatedValue: Animated.Value;
+  animations: ScreenAnimations | null;
   isAnimating: boolean;
   navigatorState: NavigatorState;
   onNavigate(toRoute: string, newRouteStack: string[]): void;
@@ -122,6 +147,7 @@ interface ScreenRendererProps {
 
 const ScreenRenderer: React.FC<ScreenRendererProps> = ({
   animatedValue,
+  animations,
   onNavigate,
   navigatorState,
   isAnimating,
@@ -141,16 +167,22 @@ const ScreenRenderer: React.FC<ScreenRendererProps> = ({
   return (
     <View style={navigatorStyles.outerContainer}>
       <ScreenContainer
-        animatedValue={animatedValue}
+        interpolatedStyles={
+          isOneScreenActive && isAnimating && animations
+            ? animations.outgoing(animatedValue)
+            : null
+        }
         isActive={isOneScreenActive}
-        isAnimating={isAnimating}
       >
         {oneRoute && oneRoute(navigationProp)}
       </ScreenContainer>
       <ScreenContainer
-        animatedValue={animatedValue}
+        interpolatedStyles={
+          isOneScreenActive && isAnimating && animations
+            ? animations.incoming(animatedValue)
+            : null
+        }
         isActive={!isOneScreenActive}
-        isAnimating={isAnimating}
       >
         {anotherRoute && anotherRoute(navigationProp)}
       </ScreenContainer>
