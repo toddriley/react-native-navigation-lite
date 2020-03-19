@@ -15,7 +15,7 @@ const ScreenContainer: React.FunctionComponent<ScreenContainerProps> = ({
   isAnimating,
   isActive
 }) => {
-  const transform = isActive
+  const interpolatedStyles = isActive
     ? leftAndOut(animatedValue)
     : leftAndIn(animatedValue);
 
@@ -24,7 +24,8 @@ const ScreenContainer: React.FunctionComponent<ScreenContainerProps> = ({
       style={{
         ...screenContainerStyles.view,
         zIndex: isActive ? 1 : 0,
-        transform: isAnimating ? [transform] : []
+        opacity: isAnimating ? interpolatedStyles.opacity : undefined,
+        transform: isAnimating ? interpolatedStyles.transform : []
       }}
     >
       {children}
@@ -36,23 +37,29 @@ export default ScreenContainer;
 
 const { width: SCREEN_WIDTH } = getDimensions();
 
-export function leftAndOut(position: Animated.Value) {
-  // const opacity = position.interpolate({
-  //   inputRange: [0, 0.99, 1],
-  //   outputRange: [1, 0, 0]
-  // });
+type InterpolatedStyles = {
+  opacity?: Animated.AnimatedInterpolation;
+  transform: {
+    translateX: Animated.AnimatedInterpolation;
+  }[];
+};
+
+export function leftAndOut(position: Animated.Value): InterpolatedStyles {
+  const opacity = position.interpolate({
+    inputRange: [0, 0.99, 1],
+    outputRange: [1, 0, 0]
+  });
   const translateX = position.interpolate({
     inputRange: [0, 1],
     outputRange: [0, SCREEN_WIDTH * -1]
   });
-  // return { opacity, translateX };
-  return { translateX };
+  return { opacity, transform: [{ translateX }] };
 }
 
-export function leftAndIn(position: Animated.Value) {
+export function leftAndIn(position: Animated.Value): InterpolatedStyles {
   const translateX = position.interpolate({
     inputRange: [0, 1],
     outputRange: [SCREEN_WIDTH, 0]
   });
-  return { translateX };
+  return { transform: [{ translateX }] };
 }
