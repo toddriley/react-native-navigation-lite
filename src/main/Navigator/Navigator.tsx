@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Animated, View, Easing } from "react-native";
 import ScreenContainer from "./Components/ScreenContainer";
-import { navigatorStyles } from "./navigatorStyles";
 import { useBackHandler } from "./hooks/useBackHandler";
+import { navigatorStyles } from "./navigatorStyles";
 
 export type NavigationProp = {
   navigation: {
@@ -34,17 +34,44 @@ const Navigator: React.FC<NavigatorProps> = ({
     routeStack: [initialRouteName]
   });
 
+  const [isAnimating, setIsAnimating] = useState<boolean>(false);
+  const [animatedValue] = useState<Animated.Value>(new Animated.Value(0));
+
+  const handleAnimate = () => {
+    animatedValue.setValue(0);
+    setIsAnimating(true);
+  };
+
+  const handleAnimationEnd = () => {
+    setNavigatorState(prevState => {
+      const { isOneScreenActive, oneScreen, anotherScreen } = prevState;
+      const willOneScreenBeActive = !isOneScreenActive;
+      return {
+        ...prevState,
+        isOneScreenActive: willOneScreenBeActive,
+        oneScreen: willOneScreenBeActive ? oneScreen : null,
+        anotherScreen: willOneScreenBeActive ? null : anotherScreen
+      };
+    });
+    setIsAnimating(false);
+  };
+
   const handleNavigate = (toRoute: string, newRouteStack: string[]) => {
-    setNavigatorState(
-      ({ isOneScreenActive, oneScreen, anotherScreen, routeStack }) => {
-        return {
-          oneScreen: isOneScreenActive ? oneScreen : toRoute,
-          anotherScreen: isOneScreenActive ? toRoute : anotherScreen,
-          isOneScreenActive: !isOneScreenActive,
-          routeStack: newRouteStack != undefined ? newRouteStack : routeStack
-        };
-      }
-    );
+    handleAnimate();
+    setNavigatorState(prevState => {
+      const {
+        isOneScreenActive,
+        oneScreen,
+        anotherScreen,
+        routeStack
+      } = prevState;
+      return {
+        ...prevState,
+        oneScreen: isOneScreenActive ? oneScreen : toRoute,
+        anotherScreen: isOneScreenActive ? toRoute : anotherScreen,
+        routeStack: newRouteStack != undefined ? newRouteStack : routeStack
+      };
+    });
   };
 
   const handleHardwareBackPress = (): boolean => {
@@ -52,8 +79,6 @@ const Navigator: React.FC<NavigatorProps> = ({
     if (routeStack.length > 1) {
       const toRoute = routeStack[routeStack.length - 2];
       const newRouteStack = routeStack.slice(0, routeStack.length - 1);
-      console.log(toRoute);
-      console.log(newRouteStack);
       handleNavigate(toRoute, newRouteStack);
       return true;
     }
@@ -62,10 +87,24 @@ const Navigator: React.FC<NavigatorProps> = ({
 
   useBackHandler(handleHardwareBackPress);
 
+  useEffect(() => {
+    if (isAnimating) {
+      Animated.timing(animatedValue, {
+        duration: 500,
+        easing: Easing.inOut(Easing.ease),
+        toValue: 1,
+        useNativeDriver: true
+      }).start(handleAnimationEnd);
+    }
+    return () => {};
+  }, [isAnimating]);
+
   return (
     <ScreenRenderer
-      onNavigate={handleNavigate}
+      animatedValue={animatedValue}
+      isAnimating={isAnimating}
       navigatorState={navigatorState}
+      onNavigate={handleNavigate}
       routeMap={routeMap}
     />
   );
@@ -74,14 +113,18 @@ const Navigator: React.FC<NavigatorProps> = ({
 export default Navigator;
 
 interface ScreenRendererProps {
-  onNavigate(toRoute: string, newRouteStack: string[]): void;
+  animatedValue: Animated.Value;
+  isAnimating: boolean;
   navigatorState: NavigatorState;
+  onNavigate(toRoute: string, newRouteStack: string[]): void;
   routeMap: Map<string, React.FC<NavigationProp>>;
 }
 
 const ScreenRenderer: React.FC<ScreenRendererProps> = ({
+  animatedValue,
   onNavigate,
   navigatorState,
+  isAnimating,
   routeMap
 }) => {
   const {
@@ -97,10 +140,18 @@ const ScreenRenderer: React.FC<ScreenRendererProps> = ({
   };
   return (
     <View style={navigatorStyles.outerContainer}>
-      <ScreenContainer zIndex={isOneScreenActive ? 1 : 0}>
+      <ScreenContainer
+        animatedValue={animatedValue}
+        isActive={isOneScreenActive}
+        isAnimating={isAnimating}
+      >
         {oneRoute && oneRoute(navigationProp)}
       </ScreenContainer>
-      <ScreenContainer zIndex={isOneScreenActive ? 0 : 1}>
+      <ScreenContainer
+        animatedValue={animatedValue}
+        isActive={!isOneScreenActive}
+        isAnimating={isAnimating}
+      >
         {anotherRoute && anotherRoute(navigationProp)}
       </ScreenContainer>
     </View>
