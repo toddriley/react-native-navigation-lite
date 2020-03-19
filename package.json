@@ -1,0 +1,29 @@
+{
+  "name": "navigation-lite",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "avd": "emulator -avd $EMULATOR",
+    "postinstall": "npx jetify",
+    "start": "npx react-native run-android"
+  },
+  "dependencies": {
+    "react": "16.9.0",
+    "react-native": "0.61.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.7",
+    "@babel/runtime": "^7.8.7",
+    "@babel/preset-typescript": "^7.7.4",
+    "metro-react-native-babel-preset": "^0.58.0",
+    "@types/node": "^12.12.11",
+    "@types/react": "^16.9.14",
+    "@types/react-dom": "^16.9.4",
+    "@types/react-native": "^0.60.23",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-jest": "^24.9.0",
+    "babel-preset-react-native": "^4.0.1",
+    "jetifier": "^1.6.4",
+    "typescript": "^3.7.2"
+  }
+}
