@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Text, View, Animated } from "react-native";
 import { NavigationProp } from "../Navigator/Navigator";
-import { getDimensions } from "../Navigator/navigatorStyles";
+import { getDimensions } from "../Navigator/Components/screenRendererStyles";
 import { InterpolatedStyles } from "../Navigator/Components/ScreenContainer";
 
 const Welcome: React.FunctionComponent<NavigationProp> = ({ navigation }) => {

@@ -10,7 +10,7 @@ export const getDimensions = () => ({
   height: HEIGHT
 });
 
-export const navigatorStyles = StyleSheet.create({
+export const screenRendererStyles = StyleSheet.create({
   outerContainer: {
     width: WIDTH,
     height: HEIGHT,
