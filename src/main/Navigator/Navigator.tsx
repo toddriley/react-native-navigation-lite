@@ -3,6 +3,7 @@ import { Animated, Easing } from "react-native";
 import { InterpolatedStyles } from "./Components/ScreenContainer";
 import { ScreenRenderer } from "./Components/ScreenRenderer";
 import { useBackHandler } from "./hooks/useBackHandler";
+import { minorBackward } from "../Animations/screenAnimations";
 
 export type NavigationProp = {
   navigation: {
@@ -76,9 +77,7 @@ const Navigator: React.FC<NavigatorProps> = ({
     newRouteStack: string[],
     animations?: ScreenAnimations
   ) => {
-    if (animations) {
-      setScreenAnimations(animations);
-    }
+    setScreenAnimations(animations ? animations : null);
     handleAnimate();
     setNavigatorState(prevState => {
       const {
@@ -101,7 +100,7 @@ const Navigator: React.FC<NavigatorProps> = ({
     if (routeStack.length > 1) {
       const toRoute = routeStack[routeStack.length - 2];
       const newRouteStack = routeStack.slice(0, routeStack.length - 1);
-      handleNavigate(toRoute, newRouteStack);
+      handleNavigate(toRoute, newRouteStack, minorBackward);
       return true;
     }
     return false;
