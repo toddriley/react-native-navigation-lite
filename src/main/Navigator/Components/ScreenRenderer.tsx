@@ -1,7 +1,7 @@
 import React from "react";
 import { Animated, View } from "react-native";
 import { NavigationProp, NavigatorState, ScreenAnimations } from "../Navigator";
-import ScreenContainer from "./ScreenContainer";
+import ScreenContainer, { InterpolatedStyles } from "./ScreenContainer";
 import { screenRendererStyles } from "./screenRendererStyles";
 
 interface ScreenRendererProps {
@@ -32,24 +32,26 @@ export const ScreenRenderer: React.FC<ScreenRendererProps> = ({
   const navigationProp: NavigationProp = {
     navigation: { navigate: onNavigate, routeStack }
   };
+  let oneScreenStyles: InterpolatedStyles | null = null;
+  let anotherScreenStyles: InterpolatedStyles | null = null;
+  if (animations && isAnimating) {
+    oneScreenStyles = isOneScreenActive
+      ? animations.outgoing(animatedValue)
+      : animations.incoming(animatedValue);
+    anotherScreenStyles = isOneScreenActive
+      ? animations.incoming(animatedValue)
+      : animations.outgoing(animatedValue);
+  }
   return (
     <View style={screenRendererStyles.outerContainer}>
       <ScreenContainer
-        interpolatedStyles={
-          isOneScreenActive && isAnimating && animations
-            ? animations.outgoing(animatedValue)
-            : null
-        }
+        interpolatedStyles={oneScreenStyles}
         isActive={isOneScreenActive}
       >
         {oneRoute && oneRoute(navigationProp)}
       </ScreenContainer>
       <ScreenContainer
-        interpolatedStyles={
-          isOneScreenActive && isAnimating && animations
-            ? animations.incoming(animatedValue)
-            : null
-        }
+        interpolatedStyles={anotherScreenStyles}
         isActive={!isOneScreenActive}
       >
         {anotherRoute && anotherRoute(navigationProp)}
