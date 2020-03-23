@@ -5,13 +5,14 @@ import { ScreenRenderer } from "./Components/ScreenRenderer";
 import { useBackHandler } from "./hooks/useBackHandler";
 import { minorBackward } from "../Animations/screenAnimations";
 
+export type NavigateOptions = {
+  newRouteStack?: string[];
+  animations?: ScreenAnimations;
+};
+
 export type NavigationProp = {
   navigation: {
-    navigate(
-      toRoute: string,
-      newRouteStack: string[],
-      animations?: ScreenAnimations
-    ): void;
+    navigate(toRoute: string, options: NavigateOptions): void;
     routeStack: string[];
   };
 };
@@ -23,6 +24,7 @@ interface NavigatorProps {
 
 export type NavigatorState = {
   anotherScreen: string | null;
+  isAnimating: boolean;
   isOneScreenActive: boolean;
   oneScreen: string | null;
   routeStack: string[];
@@ -41,56 +43,82 @@ const Navigator: React.FC<NavigatorProps> = ({
 }) => {
   const [navigatorState, setNavigatorState] = useState<NavigatorState>({
     anotherScreen: null,
+    isAnimating: false,
     isOneScreenActive: true,
     oneScreen: initialRouteName,
     routeStack: [initialRouteName]
   });
 
-  const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const [animatedValue] = useState<Animated.Value>(new Animated.Value(0));
   const [
     screenAnimations,
     setScreenAnimations
   ] = useState<ScreenAnimations | null>(null);
 
-  const handleAnimate = () => {
+  const startAnimation = (toRoute: string, options?: NavigateOptions) => {
+    setupScreensForAnimation(toRoute, options && options.newRouteStack);
     animatedValue.setValue(0);
-    setIsAnimating(true);
   };
 
   const handleAnimationEnd = () => {
-    setNavigatorState(prevState => {
-      const { isOneScreenActive, oneScreen, anotherScreen } = prevState;
-      const willOneScreenBeActive = !isOneScreenActive;
-      return {
-        ...prevState,
-        isOneScreenActive: willOneScreenBeActive,
-        oneScreen: willOneScreenBeActive ? oneScreen : null,
-        anotherScreen: willOneScreenBeActive ? null : anotherScreen
-      };
-    });
-    setIsAnimating(false);
+    finalizeScreensAfterAnimation();
   };
 
-  const handleNavigate = (
+  const handleNavigate = (toRoute: string, options?: NavigateOptions) => {
+    if (options && options.animations) {
+      setScreenAnimations(options.animations);
+      startAnimation(toRoute, options);
+    } else {
+      !!screenAnimations && setScreenAnimations(null);
+      swapScreensNow(toRoute, options && options.newRouteStack);
+    }
+  };
+
+  const swapScreensNow = (toRoute: string, newRouteStack?: string[]) => {
+    setNavigatorState(prevState => {
+      const { isOneScreenActive, routeStack } = prevState;
+      return {
+        ...prevState,
+        oneScreen: isOneScreenActive ? null : toRoute,
+        anotherScreen: isOneScreenActive ? toRoute : null,
+        isOneScreenActive: !isOneScreenActive,
+        routeStack: newRouteStack ? newRouteStack : [...routeStack, toRoute]
+      };
+    });
+  };
+
+  const setupScreensForAnimation = (
     toRoute: string,
-    newRouteStack: string[],
-    animations?: ScreenAnimations
+    newRouteStack?: string[]
   ) => {
-    setScreenAnimations(animations ? animations : null);
-    handleAnimate();
     setNavigatorState(prevState => {
       const {
+        anotherScreen,
         isOneScreenActive,
         oneScreen,
-        anotherScreen,
         routeStack
       } = prevState;
+
       return {
         ...prevState,
         oneScreen: isOneScreenActive ? oneScreen : toRoute,
         anotherScreen: isOneScreenActive ? toRoute : anotherScreen,
-        routeStack: newRouteStack != undefined ? newRouteStack : routeStack
+        isAnimating: true,
+        routeStack: newRouteStack ? newRouteStack : [...routeStack, toRoute]
+      };
+    });
+  };
+
+  const finalizeScreensAfterAnimation = () => {
+    setNavigatorState(prevState => {
+      const { anotherScreen, isOneScreenActive, oneScreen } = prevState;
+      const willOneScreenBeActive = !isOneScreenActive;
+      return {
+        ...prevState,
+        anotherScreen: willOneScreenBeActive ? null : anotherScreen,
+        isAnimating: false,
+        isOneScreenActive: willOneScreenBeActive,
+        oneScreen: willOneScreenBeActive ? oneScreen : null
       };
     });
   };
@@ -100,7 +128,7 @@ const Navigator: React.FC<NavigatorProps> = ({
     if (routeStack.length > 1) {
       const toRoute = routeStack[routeStack.length - 2];
       const newRouteStack = routeStack.slice(0, routeStack.length - 1);
-      handleNavigate(toRoute, newRouteStack, minorBackward);
+      handleNavigate(toRoute, { newRouteStack, animations: minorBackward });
       return true;
     }
     return false;
@@ -108,6 +136,7 @@ const Navigator: React.FC<NavigatorProps> = ({
 
   useBackHandler(handleHardwareBackPress);
 
+  const { isAnimating } = navigatorState;
   useEffect(() => {
     if (isAnimating) {
       Animated.timing(animatedValue, {
@@ -120,6 +149,7 @@ const Navigator: React.FC<NavigatorProps> = ({
     return () => {};
   }, [isAnimating]);
 
+  console.log(navigatorState);
   return (
     <ScreenRenderer
       animatedValue={animatedValue}

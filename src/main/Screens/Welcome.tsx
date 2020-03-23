@@ -5,11 +5,9 @@ import { NavigationProp } from "../Navigator/Navigator";
 
 const Welcome: React.FunctionComponent<NavigationProp> = ({ navigation }) => {
   const handlePress = () => {
-    navigation.navigate(
-      "Trip",
-      [...navigation.routeStack, "Trip"],
-      minorForward
-    );
+    navigation.navigate("Trip", {
+      animations: minorForward
+    });
   };
   return (
     <View style={{ flex: 1, backgroundColor: "blue" }}>

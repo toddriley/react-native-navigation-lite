@@ -5,7 +5,10 @@ import { NavigationProp } from "../Navigator/Navigator";
 
 const Trip: React.FunctionComponent<NavigationProp> = ({ navigation }) => {
   const handlePress = () => {
-    navigation.navigate("Welcome", ["Welcome"], minorBackward);
+    navigation.navigate("Welcome", {
+      newRouteStack: ["Welcome"],
+      animations: minorBackward
+    });
   };
   return (
     <View style={{ flex: 1, backgroundColor: "red" }}>

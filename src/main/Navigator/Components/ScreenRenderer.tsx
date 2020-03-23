@@ -1,6 +1,11 @@
 import React from "react";
 import { Animated, View } from "react-native";
-import { NavigationProp, NavigatorState, ScreenAnimations } from "../Navigator";
+import {
+  NavigationProp,
+  NavigatorState,
+  ScreenAnimations,
+  NavigateOptions
+} from "../Navigator";
 import ScreenContainer, { InterpolatedStyles } from "./ScreenContainer";
 import { screenRendererStyles } from "./screenRendererStyles";
 
@@ -9,7 +14,7 @@ interface ScreenRendererProps {
   animations: ScreenAnimations | null;
   isAnimating: boolean;
   navigatorState: NavigatorState;
-  onNavigate(toRoute: string, newRouteStack: string[]): void;
+  onNavigate(toRoute: string, options: NavigateOptions): void;
   routeMap: Map<string, React.FC<NavigationProp>>;
 }
 
