@@ -2,7 +2,7 @@
 
 ## The Issue
 
-Other Navigation libraries for react native have too many features for most situations. There are two issues resulting from this approach:
+Other Navigation libraries for react native have too many features for most situations. There are several issues resulting from this approach:
 
 1. Components on screens that are not focused are still mounted which can introduce confusing side effects. To handle these cases developers must check if a screen is focused before doing things.
 2. If there are circular navigation flows in your app then the stack of screens (depending on the type of navigator that's implemented) will grow infinitely or need to be cleaned up. If the stack is cleaned up then it will re-mount every component in the app. This creates more cases for the developer to handle.
