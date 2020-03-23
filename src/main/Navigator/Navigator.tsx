@@ -149,7 +149,6 @@ const Navigator: React.FC<NavigatorProps> = ({
     return () => {};
   }, [isAnimating]);
 
-  console.log(navigatorState);
   return (
     <ScreenRenderer
       animatedValue={animatedValue}
