@@ -1,6 +1,6 @@
 import { Animated } from "react-native";
-import { InterpolatedStyles } from "../Navigator/Components/ScreenContainer";
 import { getDimensions } from "../Navigator/Components/screenRendererStyles";
+import { InterpolatedStyles } from "../Navigator/types";
 
 const { width: SCREEN_WIDTH } = getDimensions();
 

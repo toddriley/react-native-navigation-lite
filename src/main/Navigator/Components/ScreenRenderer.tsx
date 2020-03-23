@@ -1,12 +1,13 @@
 import React from "react";
 import { Animated, View } from "react-native";
 import {
+  InterpolatedStyles,
+  NavigateOptions,
   NavigationProp,
   NavigatorState,
-  ScreenAnimations,
-  NavigateOptions
-} from "../Navigator";
-import ScreenContainer, { InterpolatedStyles } from "./ScreenContainer";
+  ScreenAnimations
+} from "../types";
+import ScreenContainer from "./ScreenContainer";
 import { screenRendererStyles } from "./screenRendererStyles";
 
 interface ScreenRendererProps {

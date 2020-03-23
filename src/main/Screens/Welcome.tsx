@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Text, View } from "react-native";
 import { minorForward } from "../Animations/screenAnimations";
-import { NavigationProp } from "../Navigator/Navigator";
+import { NavigationProp } from "../Navigator/types";
 
 const Welcome: React.FunctionComponent<NavigationProp> = ({ navigation }) => {
   const handlePress = () => {

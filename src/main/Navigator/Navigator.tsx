@@ -1,41 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Animated, Easing } from "react-native";
-import { InterpolatedStyles } from "./Components/ScreenContainer";
+import { minorBackward } from "../Animations/screenAnimations";
 import { ScreenRenderer } from "./Components/ScreenRenderer";
 import { useBackHandler } from "./hooks/useBackHandler";
-import { minorBackward } from "../Animations/screenAnimations";
-
-export type NavigateOptions = {
-  newRouteStack?: string[];
-  animations?: ScreenAnimations;
-};
-
-export type NavigationProp = {
-  navigation: {
-    navigate(toRoute: string, options: NavigateOptions): void;
-    routeStack: string[];
-  };
-};
-
-interface NavigatorProps {
-  initialRouteName: string;
-  routeMap: Map<string, React.FC<NavigationProp>>;
-}
-
-export type NavigatorState = {
-  anotherScreen: string | null;
-  isAnimating: boolean;
-  isOneScreenActive: boolean;
-  oneScreen: string | null;
-  routeStack: string[];
-};
-
-type AnimationFunction = (position: Animated.Value) => InterpolatedStyles;
-
-export type ScreenAnimations = {
-  incoming: AnimationFunction;
-  outgoing: AnimationFunction;
-};
+import {
+  NavigateOptions,
+  NavigatorProps,
+  NavigatorState,
+  ScreenAnimations
+} from "./types";
 
 const Navigator: React.FC<NavigatorProps> = ({
   initialRouteName,

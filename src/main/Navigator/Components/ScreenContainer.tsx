@@ -1,5 +1,6 @@
 import React from "react";
 import { Animated } from "react-native";
+import { InterpolatedStyles } from "../types";
 import { screenContainerStyles } from "./screenContainerStyles";
 
 interface ScreenContainerProps {
@@ -27,10 +28,3 @@ const ScreenContainer: React.FunctionComponent<ScreenContainerProps> = ({
 };
 
 export default ScreenContainer;
-
-export type InterpolatedStyles = {
-  opacity?: Animated.AnimatedInterpolation;
-  transform: {
-    translateX: Animated.AnimatedInterpolation;
-  }[];
-};

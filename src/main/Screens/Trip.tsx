@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Text, View } from "react-native";
 import { minorBackward } from "../Animations/screenAnimations";
-import { NavigationProp } from "../Navigator/Navigator";
+import { NavigationProp } from "../Navigator/types";
 
 const Trip: React.FunctionComponent<NavigationProp> = ({ navigation }) => {
   const handlePress = () => {

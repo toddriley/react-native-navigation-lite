@@ -1,5 +1,6 @@
 import React from "react";
-import Navigator, { NavigationProp } from "./Navigator/Navigator";
+import Navigator from "./Navigator/Navigator";
+import { NavigationProp } from "./Navigator/types";
 import Trip from "./Screens/Trip";
 import Welcome from "./Screens/Welcome";
 
